@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 
-interface ThumbnailSlideshowProps {
+type ThumbnailSlideshowProps = {
   thumbnails: string[];
   videoSrc?: string;
   className?: string;
 }
 
-const ThumbnailSlideshow = ({ thumbnails, videoSrc, className = '' }: ThumbnailSlideshowProps) => {
+export function ThumbnailSlideshow({ thumbnails, videoSrc, className = '' }: ThumbnailSlideshowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(0);
   const [isSliding, setIsSliding] = useState(false);

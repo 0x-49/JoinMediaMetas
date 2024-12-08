@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Metadata } from 'next'
+import FeatureSection from '@/app/components/feature-section'
 
 const AFFILIATE_LINK = "https://whop.com/media-metas-f4/?a=digitalartlab";
 
@@ -31,6 +33,19 @@ const features = [
     description: "Join our exclusive community of successful creators who are ready to help you succeed.",
   }
 ];
+
+export const metadata: Metadata = {
+  title: 'Features - Media Metas',
+  description: 'Discover our powerful social media management features including content scheduling, analytics, and engagement tools.',
+  openGraph: {
+    title: 'Features - Media Metas',
+    description: 'Discover our powerful social media management features',
+  },
+  twitter: {
+    title: 'Features - Media Metas',
+    description: 'Discover our powerful social media management features',
+  }
+}
 
 export default function FeaturesPage() {
   const handleCTAClick = () => {

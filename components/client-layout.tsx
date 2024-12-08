@@ -6,7 +6,11 @@ import ScrollIndicator from './scroll-indicator';
 import Link from 'next/link';
 import { FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa';
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+type ClientLayoutProps = {
+  children: React.ReactNode;
+};
+
+export function ClientLayout({ children }: ClientLayoutProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
