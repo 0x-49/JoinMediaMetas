@@ -1,5 +1,4 @@
-import { Metadata } from 'next'
-import FeaturesPage from '@/app/components/features-page'
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: 'Features - Media Metas',
@@ -12,8 +11,4 @@ export const metadata: Metadata = {
     title: 'Features - Media Metas',
     description: 'Discover our powerful social media management features',
   }
-}
-
-export default function Page() {
-  return <FeaturesPage />
 }
