@@ -4,15 +4,11 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com'],
   },
-  // Optimize build performance
+  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Reduce build output size
-  output: 'standalone',
-  experimental: {
-    optimizeCss: true
-  }
+  output: 'standalone'
 }
 
 module.exports = nextConfig
