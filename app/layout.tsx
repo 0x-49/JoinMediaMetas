@@ -4,6 +4,7 @@ import { ClientLayout } from '@/components/client-layout'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { GoogleAnalytics } from '@/components/google-analytics'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -62,6 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <GoogleAnalytics />
         <link rel="canonical" href="https://your-domain.com" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="manifest" href="/manifest.json" />
