@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react";
-import { Pause } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThumbnailSlideshow from "./thumbnail-slideshow";
 
@@ -17,12 +17,26 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
   const [error, setError] = useState<string | null>(null);
   const [isEnded, setIsEnded] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Detect touch device on mount
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
+
+  const showControlsTemporarily = () => {
+    setShowControls(true);
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+    if (isPlaying) {
+      const timeout = setTimeout(() => {
+        setShowControls(false);
+      }, 2000);
+      setControlsTimeout(timeout);
+    }
+  };
 
   // Handle video loading and errors
   useEffect(() => {
@@ -44,7 +58,7 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     };
     const handlePlay = () => {
       setIsPlaying(true);
-      setShowControls(false);
+      showControlsTemporarily();
     };
     const handlePause = () => {
       setIsPlaying(false);
@@ -59,13 +73,6 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
 
-    // Preload video metadata
-    try {
-      video.load();
-    } catch (e) {
-      setError('Failed to load video');
-    }
-
     return () => {
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('error', handleError);
@@ -74,8 +81,11 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
+      if (controlsTimeout) {
+        clearTimeout(controlsTimeout);
+      }
     };
-  }, [src]);
+  }, []);
 
   // Handle play/pause with error handling
   const togglePlay = async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -105,24 +115,33 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
                 document.removeEventListener('touchend', playOnTouch);
               } catch (e) {
                 setError('Failed to play video on mobile');
-                setShowControls(true);
               }
             };
             document.addEventListener('touchend', playOnTouch);
           } else {
             setError('Failed to play video');
-            setShowControls(true);
           }
         }
       }
     } catch (e) {
       setError('Video playback error');
-      setShowControls(true);
+    }
+  };
+
+  const handleVideoClick = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isPlaying) {
+      showControlsTemporarily();
+    } else {
+      togglePlay(e);
     }
   };
 
   return (
-    <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black">
+    <div 
+      className="relative w-full aspect-video rounded-lg overflow-hidden bg-black group"
+      onMouseMove={showControlsTemporarily}
+      onTouchStart={showControlsTemporarily}
+    >
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-center p-4">
           <p>{error}</p>
@@ -134,14 +153,15 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
         className="w-full h-full object-cover"
         playsInline
         muted
-        onClick={togglePlay}
-        onTouchEnd={togglePlay}
+        onClick={handleVideoClick}
+        onTouchEnd={handleVideoClick}
       >
         <source src={src} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {showControls && !error && (
+      {/* Initial play button (center, only shows before first play) */}
+      {!isPlaying && !isEnded && showControls && (
         <Button
           variant="ghost"
           size="icon"
@@ -149,18 +169,24 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
           onClick={togglePlay}
         >
           <div className="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center">
-            {isPlaying ? (
-              <Pause className="w-8 h-8 text-white" />
-            ) : (
-              <svg
-                className="w-8 h-8 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
+            <Play className="w-8 h-8 text-white" />
           </div>
+        </Button>
+      )}
+
+      {/* Floating play/pause button (bottom right) */}
+      {(isPlaying || isEnded) && showControls && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 transition-opacity duration-300"
+          onClick={togglePlay}
+        >
+          {isPlaying ? (
+            <Pause className="w-5 h-5 text-white" />
+          ) : (
+            <Play className="w-5 h-5 text-white" />
+          )}
         </Button>
       )}
 
