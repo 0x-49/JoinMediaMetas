@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa';
 import ThemeToggle from './theme-toggle';
 import { Button } from "@/components/ui/button";
+import { MobileMenu } from './mobile-menu';
+import { usePathname } from 'next/navigation';
 
 type ClientLayoutProps = {
   children: React.ReactNode;
@@ -13,6 +15,7 @@ type ClientLayoutProps = {
 
 export function ClientLayout({ children }: ClientLayoutProps) {
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -21,6 +24,12 @@ export function ClientLayout({ children }: ClientLayoutProps) {
   if (!mounted) {
     return null;
   }
+
+  const menuItems = [
+    { href: "/", label: "Home" },
+    { href: "/features", label: "Features" },
+    { href: "/pricing", label: "Pricing" },
+  ];
 
   return (
     <div className="relative">
@@ -32,26 +41,29 @@ export function ClientLayout({ children }: ClientLayoutProps) {
             MEDIA METAS
           </span>
           <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm font-medium">
-            <Link href="/" className="transition-colors hover:text-foreground/80 whitespace-nowrap">
-              Home
-            </Link>
-            <Link href="/features" className="transition-colors hover:text-foreground/80 whitespace-nowrap">
-              Features
-            </Link>
-            <Link href="/pricing" className="transition-colors hover:text-foreground/80 whitespace-nowrap">
-              Pricing
-            </Link>
+            {menuItems.map(({ href, label }) => (
+              <Link 
+                key={href}
+                href={href} 
+                className={`transition-colors hover:text-foreground/80 whitespace-nowrap ${
+                  pathname === href ? "text-foreground" : "text-foreground/60"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
           <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
             <ThemeToggle />
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-xs sm:text-sm hover:bg-pink-500/10 whitespace-nowrap px-2 sm:px-4"
+              className="hidden sm:inline-flex text-xs sm:text-sm hover:bg-pink-500/10 whitespace-nowrap px-2 sm:px-4"
               onClick={() => window.open("https://whop.com/media-metas-f4/?a=digitalartlab", "_blank")}
             >
               Sign Up
             </Button>
+            <MobileMenu />
           </div>
         </div>
       </header>
@@ -63,6 +75,19 @@ export function ClientLayout({ children }: ClientLayoutProps) {
         <footer className="border-t">
           <div className="container py-8">
             <div className="flex flex-col items-center space-y-8">
+              {/* Navigation Links */}
+              <nav className="grid grid-cols-2 sm:flex sm:space-x-8 gap-4 text-sm font-medium">
+                {menuItems.map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 hover:text-foreground"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+
               {/* Affiliate Disclaimer */}
               <div className="max-w-3xl text-center text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">⚠️ Affiliate Disclosure</p>
@@ -98,21 +123,6 @@ export function ClientLayout({ children }: ClientLayoutProps) {
                   {mounted && (
                     <p>{new Date().getFullYear()} | Independent Media Metas Affiliate Site</p>
                   )}
-                </div>
-                <div className="mt-4 space-y-2">
-                  <p>
-                    <a 
-                      href="https://whop.com/media-metas-f4/?a=digitalartlab" 
-                      className="text-primary hover:underline whitespace-nowrap"
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      Visit Official Media Metas Page on Whop.com
-                    </a>
-                  </p>
-                  <p className="text-xs">
-                    All trademarks, logos, and brand names are the property of their respective owners.
-                  </p>
                 </div>
               </div>
             </div>
