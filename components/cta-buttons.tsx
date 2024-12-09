@@ -12,10 +12,17 @@ export function CTAButtons({ cta1, cta2 }: CTAButtonsProps) {
 
   return (
     <>
-      <Button className="w-full" onClick={() => window.open(affiliateLink, '_blank')}>
+      <Button 
+        className="w-full text-base sm:text-lg font-medium px-4 py-2 h-auto whitespace-normal text-center min-h-[44px]" 
+        onClick={() => window.open(affiliateLink, '_blank')}
+      >
         {cta1}
       </Button>
-      <Button variant="outline" className="w-full" onClick={() => window.open(affiliateLink, '_blank')}>
+      <Button 
+        variant="outline" 
+        className="w-full text-base sm:text-lg font-medium px-4 py-2 h-auto whitespace-normal text-center min-h-[44px]" 
+        onClick={() => window.open(affiliateLink, '_blank')}
+      >
         {cta2}
       </Button>
     </>

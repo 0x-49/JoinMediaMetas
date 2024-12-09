@@ -15,6 +15,13 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
   const [isPlaying, setIsPlaying] = useState(false);
   const [canPlay, setCanPlay] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEnded, setIsEnded] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Detect touch device on mount
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Handle video loading and errors
   useEffect(() => {
@@ -29,11 +36,17 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     };
     const handleStalled = () => setError('Video playback stalled');
     const handleWaiting = () => setCanPlay(false);
+    const handleEnded = () => {
+      setIsEnded(true);
+      setIsPlaying(false);
+    };
 
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('error', handleError);
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('ended', handleEnded);
+    video.addEventListener('pause', () => setIsPlaying(false));
 
     // Preload video metadata
     try {
@@ -47,6 +60,8 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
       video.removeEventListener('error', handleError);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('pause', () => setIsPlaying(false));
     };
   }, [src]);
 
@@ -58,8 +73,9 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
       if (isPlaying) {
         await videoRef.current.pause();
       } else {
-        // Reset error state when trying to play
+        // Reset error state and isEnded when trying to play
         setError(null);
+        setIsEnded(false);
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           await playPromise;
@@ -69,6 +85,21 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     } catch (e) {
       setError('Failed to play video');
       setIsPlaying(false);
+    }
+  };
+
+  // Handle touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isPlaying || isEnded) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isPlaying || isEnded) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -99,6 +130,8 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
           disablePictureInPicture // Prevent picture-in-picture
           loop
           onClick={togglePlay}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Multiple source formats for maximum compatibility */}
           <source src={src} type="video/mp4" />
@@ -127,7 +160,11 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
         )}
 
         {/* Centered play/pause button */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div 
+          className="absolute inset-0 flex items-center justify-center"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <Button
             variant="outline"
             size="lg"
@@ -147,33 +184,27 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
               group
               overflow-hidden
               relative
-              ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}
+              ${isPlaying || isEnded ? 'opacity-0 pointer-events-none touch-none' : 'opacity-100'}
+              ${isTouchDevice ? 'hover:opacity-0' : ''}
             `}
             onClick={(e) => {
               e.stopPropagation();
               togglePlay();
             }}
-            disabled={!canPlay}
+            disabled={!canPlay || error !== null}
+            aria-label={isPlaying ? 'Pause video' : 'Play video'}
           >
-            <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors duration-300" />
-            <div className="relative z-10">
-              {isPlaying ? (
-                <Pause className="h-10 w-10 drop-shadow-lg" />
-              ) : (
-                <div className="flex items-center justify-center w-10 h-10">
-                  <svg 
-                    viewBox="0 0 24 24" 
-                    className="w-full h-full fill-current"
-                    style={{ 
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-                      transform: 'scale(1.2) translateX(2px)'
-                    }}
-                  >
-                    <path d="M8 5.14v14.72L19 12 8 5.14z" />
-                  </svg>
-                </div>
-              )}
-            </div>
+            {isPlaying ? (
+              <Pause className="w-8 h-8" />
+            ) : (
+              <svg
+                className="w-8 h-8 fill-current"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
           </Button>
         </div>
       </div>
