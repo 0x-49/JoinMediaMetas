@@ -16,6 +16,7 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
   const [canPlay, setCanPlay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isEnded, setIsEnded] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Detect touch device on mount
@@ -39,6 +40,15 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     const handleEnded = () => {
       setIsEnded(true);
       setIsPlaying(false);
+      setShowControls(true);
+    };
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setShowControls(false);
+    };
+    const handlePause = () => {
+      setIsPlaying(false);
+      setShowControls(true);
     };
 
     video.addEventListener('canplay', handleCanPlay);
@@ -46,7 +56,8 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('ended', handleEnded);
-    video.addEventListener('pause', () => setIsPlaying(false));
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
 
     // Preload video metadata
     try {
@@ -61,7 +72,8 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('ended', handleEnded);
-      video.removeEventListener('pause', () => setIsPlaying(false));
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
     };
   }, [src]);
 
@@ -77,148 +89,86 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
     try {
       if (isPlaying) {
         await videoRef.current.pause();
-        setIsPlaying(false);
       } else {
-        // Reset error state and isEnded when trying to play
         setError(null);
         setIsEnded(false);
         try {
           const playPromise = videoRef.current.play();
           if (playPromise !== undefined) {
             await playPromise;
-            setIsPlaying(true);
           }
         } catch (playError) {
-          // On mobile, we need to try playing on user interaction
-          const playOnTouch = async () => {
-            try {
-              await videoRef.current?.play();
-              setIsPlaying(true);
-              document.removeEventListener('touchend', playOnTouch);
-            } catch (e) {
-              setError('Failed to play video on mobile');
-            }
-          };
-          document.addEventListener('touchend', playOnTouch, { once: true });
+          if (isTouchDevice) {
+            const playOnTouch = async () => {
+              try {
+                await videoRef.current?.play();
+                document.removeEventListener('touchend', playOnTouch);
+              } catch (e) {
+                setError('Failed to play video on mobile');
+                setShowControls(true);
+              }
+            };
+            document.addEventListener('touchend', playOnTouch);
+          } else {
+            setError('Failed to play video');
+            setShowControls(true);
+          }
         }
       }
     } catch (e) {
-      setError('Failed to play video');
-      setIsPlaying(false);
+      setError('Video playback error');
+      setShowControls(true);
     }
   };
-
-  // Handle touch events
-  const handleTouch = (e: React.TouchEvent) => {
-    e.preventDefault();
-    if (!isPlaying && !isEnded) {
-      togglePlay(e);
-    }
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.src = '';
-        videoRef.current.load();
-      }
-    };
-  }, []);
 
   return (
-    <div className="relative w-full" style={{ aspectRatio: '736/1316' }}>
-      {/* Fallback for browsers that don't support aspect-ratio */}
-      <div className="pb-[178.8%]" /> 
-      <div className="absolute inset-0">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover rounded-lg"
-          playsInline // iOS compatibility
-          webkit-playsinline="true" // Older iOS compatibility
-          x-webkit-airplay="allow" // AirPlay support
-          preload="metadata" // Efficient loading
-          controlsList="nodownload noremoteplayback" // Prevent download and remote playback
-          disablePictureInPicture // Prevent picture-in-picture
-          loop
-          muted
-          onTouchStart={handleTouch}
-          onClick={(e) => togglePlay(e)}
+    <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black">
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-center p-4">
+          <p>{error}</p>
+        </div>
+      )}
+      
+      <video
+        ref={videoRef}
+        className="w-full h-full object-cover"
+        playsInline
+        muted
+        onClick={togglePlay}
+        onTouchEnd={togglePlay}
+      >
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {showControls && !error && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute inset-0 w-full h-full bg-black/30 hover:bg-black/40 rounded-none"
+          onClick={togglePlay}
         >
-          {/* Multiple source formats for maximum compatibility */}
-          <source src={src} type="video/mp4" />
-          <source src={src.replace('.mp4', '.webm')} type="video/webm" />
-          <p className="text-center p-4">
-            Your browser doesn't support HTML5 video. Here is a{' '}
-            <a href={src} target="_blank" rel="noopener noreferrer">
-              link to the video
-            </a>{' '}
-            instead.
-          </p>
-        </video>
-
-        {/* Show thumbnails when video is not playing */}
-        {!isPlaying && thumbnails && thumbnails.length > 0 && (
-          <div className="absolute inset-0">
-            <ThumbnailSlideshow thumbnails={thumbnails} className="absolute inset-0" />
-          </div>
-        )}
-
-        {/* Error message display */}
-        {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white p-4 text-center">
-            <p>{error}</p>
-          </div>
-        )}
-
-        {/* Centered play/pause button */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <Button
-            variant="outline"
-            size="lg"
-            className={`
-              transition-all duration-300
-              bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400
-              hover:from-purple-700 hover:via-pink-600 hover:to-orange-500
-              border-3 border-white/80
-              text-white
-              rounded-full
-              w-20 h-20
-              flex items-center justify-center
-              hover:scale-110 transform transition-transform
-              shadow-[0_0_30px_rgba(168,85,247,0.5)]
-              hover:shadow-[0_0_40px_rgba(236,72,153,0.6)]
-              backdrop-blur-sm
-              group
-              overflow-hidden
-              relative
-              ${isPlaying || isEnded ? 'opacity-0 pointer-events-none touch-none' : 'opacity-100'}
-              ${isTouchDevice ? 'hover:opacity-0' : ''}
-            `}
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay(e);
-            }}
-            disabled={!canPlay || error !== null}
-            aria-label={isPlaying ? 'Pause video' : 'Play video'}
-          >
+          <div className="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center">
             {isPlaying ? (
-              <Pause className="w-8 h-8" />
+              <Pause className="w-8 h-8 text-white" />
             ) : (
               <svg
-                className="w-8 h-8 fill-current"
+                className="w-8 h-8 text-white"
+                fill="currentColor"
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
-          </Button>
+          </div>
+        </Button>
+      )}
+
+      {thumbnails && thumbnails.length > 0 && isEnded && (
+        <div className="absolute inset-0">
+          <ThumbnailSlideshow thumbnails={thumbnails} />
         </div>
-      </div>
+      )}
     </div>
   );
 }
