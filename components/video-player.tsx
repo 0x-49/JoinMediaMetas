@@ -66,22 +66,42 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
   }, [src]);
 
   // Handle play/pause with error handling
-  const togglePlay = async () => {
+  const togglePlay = async (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!videoRef.current || !canPlay) return;
 
     try {
       if (isPlaying) {
         await videoRef.current.pause();
+        setIsPlaying(false);
       } else {
         // Reset error state and isEnded when trying to play
         setError(null);
         setIsEnded(false);
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          await playPromise;
+        try {
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+            setIsPlaying(true);
+          }
+        } catch (playError) {
+          // On mobile, we need to try playing on user interaction
+          const playOnTouch = async () => {
+            try {
+              await videoRef.current?.play();
+              setIsPlaying(true);
+              document.removeEventListener('touchend', playOnTouch);
+            } catch (e) {
+              setError('Failed to play video on mobile');
+            }
+          };
+          document.addEventListener('touchend', playOnTouch, { once: true });
         }
       }
-      setIsPlaying(!isPlaying);
     } catch (e) {
       setError('Failed to play video');
       setIsPlaying(false);
@@ -89,17 +109,10 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
   };
 
   // Handle touch events
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isPlaying || isEnded) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (isPlaying || isEnded) {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleTouch = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (!isPlaying && !isEnded) {
+      togglePlay(e);
     }
   };
 
@@ -129,9 +142,9 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
           controlsList="nodownload noremoteplayback" // Prevent download and remote playback
           disablePictureInPicture // Prevent picture-in-picture
           loop
-          onClick={togglePlay}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          muted
+          onTouchStart={handleTouch}
+          onClick={(e) => togglePlay(e)}
         >
           {/* Multiple source formats for maximum compatibility */}
           <source src={src} type="video/mp4" />
@@ -162,8 +175,6 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
         {/* Centered play/pause button */}
         <div 
           className="absolute inset-0 flex items-center justify-center"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
         >
           <Button
             variant="outline"
@@ -189,7 +200,7 @@ export default function VideoPlayer({ src, thumbnails = [] }: VideoPlayerProps) 
             `}
             onClick={(e) => {
               e.stopPropagation();
-              togglePlay();
+              togglePlay(e);
             }}
             disabled={!canPlay || error !== null}
             aria-label={isPlaying ? 'Pause video' : 'Play video'}

@@ -27,11 +27,11 @@ export function ClientLayout({ children }: ClientLayoutProps) {
       <ScrollIndicator />
 
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <span className="font-bold text-xl mr-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <div className="container flex h-14 items-center px-4">
+          <span className="font-bold text-lg sm:text-xl mr-4 sm:mr-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             MEDIA METAS
           </span>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm font-medium">
             <Link href="/" className="transition-colors hover:text-foreground/80 whitespace-nowrap">
               Home
             </Link>
@@ -42,12 +42,12 @@ export function ClientLayout({ children }: ClientLayoutProps) {
               Pricing
             </Link>
           </nav>
-          <div className="flex flex-1 items-center justify-end space-x-4">
+          <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
             <ThemeToggle />
             <Button 
               variant="ghost" 
               size="sm"
-              className="text-sm hover:bg-pink-500/10 whitespace-nowrap"
+              className="text-xs sm:text-sm hover:bg-pink-500/10 whitespace-nowrap px-2 sm:px-4"
               onClick={() => window.open("https://whop.com/media-metas-f4/?a=digitalartlab", "_blank")}
             >
               Sign Up
