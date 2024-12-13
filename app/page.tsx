@@ -1,12 +1,29 @@
 "use client";
 
-import thumbnailsByVideo from "@/components/thumbnails.json";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import ThumbnailSlideshow from "@/components/thumbnail-slideshow";
-import { Button } from "@/components/ui/button";
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import thumbnailsByVideo from "../components/thumbnails.json";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa';
-import { FAQSection } from "@/components/faq-section";
-import { JsonLd } from 'react-jsonld';
+import dynamic from 'next/dynamic';
+
+// Lazy load components
+const VimeoPlayer = dynamic(() => import("../components/vimeo-player"), {
+  loading: () => (
+    <div className="w-full aspect-[9/16] bg-gray-900 animate-pulse rounded-lg" />
+  ),
+  ssr: false
+});
+
+const ThumbnailSlideshow = dynamic(() => import("../components/thumbnail-slideshow"), {
+  loading: () => (
+    <div className="w-full aspect-[9/16] bg-gray-900 animate-pulse rounded-lg" />
+  )
+});
+
+const FAQSection = dynamic(() => import("../components/faq-section").then(mod => ({ default: mod.FAQSection })), {
+  ssr: false
+});
 
 const AFFILIATE_LINK = "https://whop.com/media-metas-f4/?a=digitalartlab";
 
@@ -15,118 +32,101 @@ const videos = [
     id: "v1",
     title: "🚀 Your First $10K Blueprint - 100% Faceless",
     description: "Ready to make your first $10K without showing your face? This simple strategy has helped thousands get started. No experience needed - just follow the steps.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487119/nn3hvl7nko7oy9wlcycx.mp4",
+    src: "1038944983",
     cta: "🔥 Start Your Journey | 💎 Join The Movement"
   },
   {
     id: "v2",
     title: "📱 $10K/Month Using Just Your Phone",
     description: "Turn your phone into a money-making machine. Learn how to leverage CapCut and the TikTok creator program to earn $1,000 per million views.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487173/jy6zczkuquodkufzejyb.mov",
+    src: "1039028078", 
     cta: "🎯 Get Started Now | 🚀 Level Up Today"
   },
   {
     id: "v3",
     title: "🎯 The Truth About TikTok Saturation",
     description: "Worried about competition? Don't be. Learn how the algorithm really works and why there's never been a better time to start.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733486947/bcmosa1paublgrcntr8s.mov",
+    src: "1039037244",
     cta: "💡 Learn More | 🔓 Unlock Success"
   },
   {
     id: "v4",
     title: "💪 Values-Driven Success Story",
     description: "18, no drink, no smoke - pure hustle. See how staying true to your values can lead to massive success in the digital space.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733486951/uyrysf0ofweymfskdkz8.mov",
+    src: "1039037326",
     cta: "🌟 Join The Movement | 💎 Start Your Journey"
   },
   {
     id: "v5",
     title: "🔥 The Burn The Boats Story",
     description: "From intentionally failing exams to paying off parents' mortgage at 21. This is what real commitment looks like.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487374/tjbxafhm44jxjbgyirny.mp4",
+    src: "1039005846",
     cta: "🚀 Take Action Now | ⚡ Transform Your Life"
   },
   {
     id: "v6",
     title: "🏠 Inside My Dream Penthouse",
     description: "21 years old, living in a luxury penthouse. This could be your reality with the right mindset and strategy.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733486958/d5dp0ams9tw1funjs9sy.mp4",
+    src: "1039008807",
     cta: "🔑 Get The Keys | 💫 Live Your Dream"
   },
   {
     id: "v7",
     title: "💰 $10K/Month TikTok Strategy Revealed",
     description: "Top creators are using this exact strategy. Learn how to create viral content that pays thousands per month.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733486997/ttwzlghkhbb56veegicv.mov",
+    src: "1038945453",
     cta: "🎯 Start Creating | 💸 Get Paid"
   },
   {
     id: "v8",
     title: "⚡ The Real Work Behind Success",
     description: "10 clips in an hour, not 30 days. Learn what real hustle looks like and how to fast-track your success.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733486976/kbcc4wmvjmccnjqlhs0y.mov",
+    src: "1039009724",
     cta: "💪 Start Grinding | 🚀 Level Up"
   },
   {
     id: "v9",
     title: "👑 JiDion Confirms: $22K in One Month",
     description: "Even JiDion knows what's up. See how I turned content creation into a $22K/month business using Crayo AI.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487367/xxzbhhlr5i1a35mr76gl.mp4",
+    src: "1039007181",
     cta: "🔥 Join Now | 💰 Scale Your Income"
   },
   {
     id: "v10",
     title: "📈 $60K/Month Success Blueprint",
     description: "From zero to $60K/month with multiple TikTok pages. Learn the exact system that makes it possible.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487387/w1hdbcs3wta86afruyum.mp4",
+    src: "1039013113",
     cta: "🎯 Get Started | 🚀 Scale Your Success"
   },
   {
     id: "v11",
     title: "🏖️ How 16M Views Got Me This Villa",
     description: "TikTok is paying stupid money right now. Learn how I turned views into a luxury lifestyle.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487034/yisagttysjksj3amvyqd.mp4",
+    src: "1039014891",
     cta: "🔑 Get Access | 💎 Transform Your Life"
   },
   {
     id: "v12",
     title: "🤫 $35K/Month TikTok Secrets Exposed",
     description: "The smartest people on TikTok are using this strategy. Time to join them and claim your piece.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733484194/ejwpxx20gx2rq2z7ats6.mp4",
+    src: "1039016952",
     cta: "🎯 Start Today | 🚀 Join The Elite"
   },
   {
     id: "v13",
     title: "🎮 Even Speed Knows What's Up",
     description: "When Speed recognizes the hustle, you know it's real. See how I'm making $40K/month with simple clips.",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733487042/rmw3vng6zwp4tiolh5cg.mp4",
+    src: "1039010786",
     cta: "💪 Join Now | 🔥 Level Up"
   },
   {
     id: "v14",
     title: "💰 How I Made Sneako Bank",
     description: "The same strategies that quadrupled Sneako's revenue can work for you. Ready to learn?",
-    src: "https://res.cloudinary.com/ddazcwtju/video/upload/v1733488858/y1vyhijuj6ydo31bow8p.mov",
+    src: "1039010617",
     cta: "🎯 Start Now | 🚀 Scale Your Success"
   }
 ];
-
-const metadata = {
-  title: 'Media Metas - Professional Social Media Management Tools',
-  description: 'Streamline your social media presence with Media Metas. Schedule posts, analyze performance, and grow your audience with our powerful tools.',
-  openGraph: {
-    title: 'Media Metas - Professional Social Media Management Tools',
-    description: 'Streamline your social media presence with Media Metas',
-    images: [
-      {
-        url: 'https://your-domain.com/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Media Metas Dashboard',
-      },
-    ],
-  }
-}
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -145,19 +145,52 @@ const structuredData = {
     ratingValue: '4.8',
     ratingCount: '1250',
   },
-}
+};
 
 export default function Page() {
+  const [playingVideo, setPlayingVideo] = React.useState<string | null>(null);
+  
   const handleCTAClick = () => {
     window.open(AFFILIATE_LINK, '_blank');
   };
 
+  // Preload videos that are likely to be played
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const preloadVideos = () => {
+        videos.slice(0, 3).forEach(video => {
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'video';
+          link.href = `https://vimeo.com/${video.src}`;
+          document.head.appendChild(link);
+        });
+      };
+      
+      // Delay preloading to not block initial page load
+      setTimeout(preloadVideos, 2000);
+    }
+  }, []);
+
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      
+      {/* Add meta tags for SEO */}
+      <head>
+        <meta name="description" content="Learn how to make $10K+ monthly with our proven TikTok monetization system. Join thousands of successful creators today!" />
+        <meta name="keywords" content="TikTok monetization, make money online, content creation, social media income, digital marketing" />
+        <meta property="og:title" content="Turn TikTok Views Into Real Money" />
+        <meta property="og:description" content="Learn how to make $10K+ monthly with our proven TikTok monetization system." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="preconnect" href="https://vimeo.com" />
+        <link rel="dns-prefetch" href="https://vimeo.com" />
+      </head>
+
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <section className="text-center mb-16">
@@ -171,63 +204,146 @@ export default function Page() {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
-              onClick={() => handleCTAClick()}
+              onClick={handleCTAClick}
             >
               Start Your Journey
             </Button>
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => handleCTAClick()}
+              onClick={handleCTAClick}
             >
               Learn More
             </Button>
-          </div>
-          <div className="mx-auto mt-8 max-w-xl text-center">
-            <p className="text-lg text-muted-foreground">
-              See why thousands trust Musa & Media Metas. No hype, just real results! 💫
-            </p>
           </div>
         </section>
 
         {/* Videos Grid */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-8">Success Stories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {videos.map((video) => (
-              <Card key={video.id} className="overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-lg">{video.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-[736/1316] w-full">
-                    <ThumbnailSlideshow
-                      thumbnails={thumbnailsByVideo[video.id as keyof typeof thumbnailsByVideo] || []}
-                      videoSrc={video.src}
-                      className="rounded-lg"
-                    />
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    {video.description}
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white"
-                    onClick={() => window.open(AFFILIATE_LINK, "_blank")}
-                  >
-                    {video.cta}
-                  </Button>
-                </CardFooter>
-              </Card>
+              <Suspense
+                key={video.id}
+                fallback={
+                  <div className="w-full aspect-[9/16] bg-gray-900 animate-pulse rounded-lg" />
+                }
+              >
+                <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold">{video.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative aspect-[9/16] w-full mb-4 bg-gray-900 rounded-lg overflow-hidden">
+                      <div className="absolute inset-0">
+                        {playingVideo !== video.id && (
+                          <div className="absolute inset-0 z-10">
+                            <ThumbnailSlideshow
+                              thumbnails={thumbnailsByVideo[video.id as keyof typeof thumbnailsByVideo] || []}
+                              className="absolute inset-0"
+                            />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 z-20">
+                          <VimeoPlayer 
+                            videoId={video.src} 
+                            thumbnails={thumbnailsByVideo[video.id as keyof typeof thumbnailsByVideo] || []}
+                            onPlayingChange={(playing) => {
+                              if (playing) {
+                                setPlayingVideo(video.id);
+                              } else if (playingVideo === video.id) {
+                                setPlayingVideo(null);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                      {video.description}
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200"
+                      onClick={handleCTAClick}
+                    >
+                      {video.cta}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </Suspense>
             ))}
           </div>
         </section>
 
         {/* FAQ Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-          <FAQSection />
+          <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-pink-500 to-purple-500 text-transparent bg-clip-text">
+            Frequently Asked Questions
+          </h2>
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">🎯</span>
+                    Do I need experience to start?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Absolutely not! Our program is specifically designed for complete beginners. We start from the basics and guide you through every step. Whether you've never edited a video or used social media for business, our comprehensive training covers everything from setting up your accounts to advanced monetization strategies.
+                  </p>
+                </div>
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">⏰</span>
+                    How long does it take to make money?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Many of our members start seeing their first earnings within 30 days of implementing our system. We've seen members make their first $1,000 within the first week, while others have scaled to $10K+ monthly within 60-90 days. Success speed varies based on dedication and implementation, but our proven framework accelerates your journey significantly.
+                  </p>
+                </div>
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">💻</span>
+                    What tools do I need?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    You only need a smartphone and internet connection to start. We provide access to all necessary software, including our premium AI tools, video editors, and automation systems. Our members get exclusive access to CapCut presets, trending sound libraries, and our proprietary content optimization tools.
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-8">
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">💰</span>
+                    How much can I realistically earn?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Our members typically earn between $5K-$40K monthly, with top performers reaching $100K+. The key factors are consistency and scaling strategies. We teach you multiple revenue streams: TikTok Creator Fund, brand deals, affiliate marketing, and our proven scaling systems. Many members start part-time and scale to full-time income within months.
+                  </p>
+                </div>
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">🎓</span>
+                    What support do I get?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    You get comprehensive 24/7 support through our private community. This includes direct access to me and my team, weekly live Q&A sessions, regular strategy updates, and our exclusive Discord community. We also provide done-for-you templates, scripts, and trending topic alerts to keep you ahead of the curve.
+                  </p>
+                </div>
+                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 flex items-center">
+                    <span className="text-pink-500 mr-2">🔒</span>
+                    Is there a guarantee?
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Yes! We offer a 30-day action-based guarantee. If you follow our system, implement the strategies, and don't see results, we'll work with you personally to ensure your success. We're committed to your growth and have a 94% success rate among active members who follow our program.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Your Time is Now Section */}
@@ -248,7 +364,7 @@ export default function Page() {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
-                onClick={() => handleCTAClick()}
+                onClick={handleCTAClick}
               >
                 Start Building Your Future Today
               </Button>
@@ -301,113 +417,28 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Final Call to Action Sections */}
-        <section className="relative overflow-hidden">
-          {/* Background with gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-pink-500/10 animate-gradient-x"></div>
+        {/* Transform Your Life Section */}
+        <section className="mb-16 text-center">
+          <h2 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-pink-500 to-purple-500 text-transparent bg-clip-text">
+            Transform Your Life Today
+          </h2>
+          <p className="text-xl mb-12 text-gray-600 dark:text-gray-300">
+            Every second you wait is a moment of potential success slipping away. 
+            While you're reading this, others are already taking action and changing their lives.
+          </p>
 
-          <div className="relative container mx-auto px-4 py-24">
-            {/* Main CTA Content */}
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-pink-500 to-purple-500 text-transparent bg-clip-text">
-                Transform Your Life Today
-              </h2>
-              <div className="max-w-3xl mx-auto mb-12">
-                <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-8">
-                  Every second you wait is a moment of potential success slipping away. 
-                  While you're reading this, others are already taking action and changing their lives.
-                </p>
-              </div>
-
-              {/* Comparison Grid */}
-              <div className="mb-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="p-8 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur border-2 border-red-500/20">
-                  <div className="text-2xl font-bold text-red-500 mb-4">❌ Without Media Metas</div>
-                  <ul className="space-y-4 text-left">
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">😓</span>
-                      <span>Wasting months figuring out what works</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">💸</span>
-                      <span>Losing money on failed experiments</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">😪</span>
-                      <span>Struggling with low views and engagement</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">🤔</span>
-                      <span>Confused by constant algorithm changes</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">😢</span>
-                      <span>Watching others succeed while you struggle</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="p-8 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur border-2 border-green-500/20">
-                  <div className="text-2xl font-bold text-green-500 mb-4">✅ With Media Metas</div>
-                  <ul className="space-y-4 text-left">
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2">🚀</span>
-                      <span>Start earning in your first 30 days</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2">💰</span>
-                      <span>Proven system making $10K-$40K monthly</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2">🎯</span>
-                      <span>Step-by-step blueprint to viral content</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2">🤖</span>
-                      <span>Access to AI tools and automation</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-green-500 mr-2">👥</span>
-                      <span>24/7 support from proven experts</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Single CTA Button */}
-              <div className="mb-12 text-center">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200 shadow-lg w-full max-w-md"
-                  onClick={() => handleCTAClick()}
-                >
-                  🔥 Join Media Metas Now
-                </Button>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <span>🔒</span>
-                  <span>Secure Payment</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>✨</span>
-                  <span>Instant Access</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>💯</span>
-                  <span>Satisfaction Guaranteed</span>
-                </div>
-              </div>
-            </div>
+          {/* Final CTA Button */}
+          <div className="mb-12">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200 shadow-lg w-full max-w-md"
+              onClick={handleCTAClick}
+            >
+              🔥 Join Media Metas Now
+            </Button>
           </div>
-
-          {/* Floating Elements */}
-          <div className="absolute top-10 left-10 w-20 h-20 bg-pink-500/10 rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-20 h-20 bg-purple-500/10 rounded-full blur-xl animate-pulse"></div>
         </section>
       </div>
-    </>
+    </div>
   );
 }
