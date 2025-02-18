@@ -8,6 +8,7 @@ import ThemeToggle from './theme-toggle';
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from './mobile-menu';
 import { usePathname } from 'next/navigation';
+import '../styles/custom.css';
 
 type ClientLayoutProps = {
   children: React.ReactNode;
@@ -37,7 +38,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
 
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center px-4">
-          <span className="font-bold text-lg sm:text-xl mr-4 sm:mr-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <span className="font-bold text-lg sm:text-xl mr-4 sm:mr-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate orbitron-font">
             MEDIA METAS
           </span>
           <nav className="hidden sm:flex items-center space-x-4 sm:space-x-6 text-sm font-medium">
@@ -88,6 +89,14 @@ export function ClientLayout({ children }: ClientLayoutProps) {
                 ))}
               </nav>
 
+              {/* Contact Information */}
+              <div className="text-center space-y-2">
+                <p className="text-lg font-semibold">Contact Us</p>
+                <p><a href="tel:8009566952" className="hover:text-primary">(800) 956-6952</a></p>
+                <p><a href="mailto:info@getmediametas.com" className="hover:text-primary">info@getmediametas.com</a></p>
+                <p className="max-w-md">11135 Montgomery Rd<br />1,528 SF of Office/Medical Space Available<br />Cincinnati, OH 45249</p>
+              </div>
+
               {/* Affiliate Disclaimer */}
               <div className="max-w-3xl text-center text-sm text-muted-foreground bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">⚠️ Affiliate Disclosure</p>
@@ -101,13 +110,13 @@ export function ClientLayout({ children }: ClientLayoutProps) {
 
               {/* Social Links */}
               <div className="flex space-x-6">
-                <a href="https://www.tiktok.com/@mussy.02" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500">
+                <a href="https://tiktok.com/@mediametas" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500" title="Follow us on TikTok">
                   <FaTiktok />
                 </a>
-                <a href="https://www.instagram.com/mussy.02/" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500">
+                <a href="https://instagram.com/mussy.02" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500" title="Follow us on Instagram">
                   <FaInstagram />
                 </a>
-                <a href="https://www.youtube.com/@MussyMakesMoney" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500">
+                <a href="https://youtube.com/@mediametas" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-pink-500" title="Subscribe to our YouTube channel">
                   <FaYoutube />
                 </a>
               </div>

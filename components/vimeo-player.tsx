@@ -224,7 +224,7 @@ export default function VimeoPlayer({ videoId, thumbnails, onPlayingChange }: Vi
           src={`https://player.vimeo.com/video/${videoId}?api=1&background=0&autoplay=0&muted=0&controls=0&quality=auto`}
           className={`w-full h-full transition-opacity duration-300 ${showThumbnail ? 'opacity-0' : 'opacity-100'}`}
           allow="autoplay; fullscreen; picture-in-picture"
-          loading="lazy"
+          title="Vimeo video player"
         />
       </div>
 
